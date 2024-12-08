@@ -32,10 +32,23 @@ public class MarchingCubes : MonoBehaviour
         voxelGrid.newGrid();
         voxelGrid.setRes(resolution);
         createGrid();
-        
-        Debug.Log("Done");
+        calcMesh();
+    }
 
+    void calcMesh()
+    {
+        for (int z = 0; z < resolution - 1; z++)
+        {
+            for (int y = 0; y < resolution - 1; y++)
+            {
+                for (int x = 0; x < resolution - 1; x++)
+                {
+                    MarchCube(x, y, z, voxelGrid);
+                }
+            }
+        }
 
+        BuildMesh();
     }
 
     void createGrid()
@@ -50,18 +63,7 @@ public class MarchingCubes : MonoBehaviour
                 }
             }
         }
-        for (int z = 0; z < resolution - 1; z++)
-        {
-            for (int y = 0; y < resolution - 1; y++)
-            {
-                for (int x = 0; x < resolution - 1; x++)
-                {
-                    MarchCube(x, y, z, voxelGrid);
-                }
-            }
-        }
-
-        BuildMesh();
+        
     }
 
     public void MarchCube(int x, int y, int z, VoxelGridData voxelGrid)    {
@@ -110,13 +112,6 @@ public class MarchingCubes : MonoBehaviour
 
     }
 
-    private void ReverseLastTriangle()
-{
-    int i = triangles.Count - 3;
-    int temp = triangles[i + 1];
-    triangles[i + 1] = triangles[i + 2];
-    triangles[i + 2] = temp;
-}
 
     void BuildMesh()
     {
@@ -143,28 +138,16 @@ public class MarchingCubes : MonoBehaviour
 
 
     float scalarField(float x, float y, float z)
-    {
-        //// Define the center of the sphere
-        //Vector3 sphereCenter = new Vector3(resolution * 0.5f, resolution * 0.5f, resolution * 0.5f);
-
-        //// Define the radius of the sphere
-        //float radius = resolution * 0.25f;
-
-        //// Calculate the squared distance from the center of the sphere
-        //float distanceSquared = (x - sphereCenter.x) * (x - sphereCenter.x) +
-        //                        (y - sphereCenter.y) * (y - sphereCenter.y) +
-        //                        (z - sphereCenter.z) * (z - sphereCenter.z);
-
-        //// Return the signed distance to the surface of the sphere
-        //return distanceSquared - radius * radius;
+    {        
         float xcoord = x / resolution;
         float ycoord = y / resolution;
         float zcoord = z / resolution;
 
-        return ClampedRemap(PerlinNoise3D(xcoord, ycoord,zcoord),0,1,-1,1) ;
+        return ClampedRemap(PerlinNoise3D(xcoord + offset.x, ycoord + offset.y, zcoord + offset.z),0,1,-1,1) ;
 
         //return y - 4;
     }
+
 
     public static float PerlinNoise3D(float x, float y, float z)
     {
