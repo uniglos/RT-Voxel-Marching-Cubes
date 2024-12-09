@@ -1,9 +1,39 @@
-class _TRIANGULATIONS
+using UnityEngine;
+
+public static class MarchingCubeData
 {
+
+    public static readonly Vector3[] points = new Vector3[8] { new Vector3(0, 0, 0),
+        new Vector3(0, 0, 1),
+        new Vector3(1, 0, 1),
+        new Vector3(1, 0, 0),
+        new Vector3(0, 1, 0),
+        new Vector3(0, 1, 1),
+        new Vector3(1, 1, 1),
+        new Vector3(1, 1, 0)
+    };
+
+    public static readonly Vector2[] Edges = new Vector2[12]
+    {
+        new Vector2(0,1),
+        new Vector2(1,2),
+        new Vector2(2,3),
+        new Vector2(3,0),
+        new Vector2(4,5),
+        new Vector2(5,6),
+        new Vector2(6,7),
+        new Vector2(7,4),
+        new Vector2(0,4),
+        new Vector2(1,5),
+        new Vector2(2,6),
+        new Vector2(3,7)
+    };
+
+
     public static readonly int[][] TRIANGULATIONS = new int[][] {
 
-    new int[] 
-    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, new int[] 
+    new int[]
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, new int[]
     { 0,  8,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, new int[]
     { 0,  1,  9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, new int[]
     { 1,  8,  3,  9,  8,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, new int[]
