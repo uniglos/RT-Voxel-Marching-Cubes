@@ -3,6 +3,15 @@ using UnityEngine;
 public static class MyMath
 {
 
+    public static Vector3 RoundToNearestVoxel(Vector3 position, float voxelSize)
+    {
+        float x = Mathf.Round(position.x / voxelSize) * voxelSize;
+        float y = Mathf.Round(position.y / voxelSize) * voxelSize;
+        float z = Mathf.Round(position.z / voxelSize) * voxelSize;
+
+        return new Vector3(x, y, z);
+    }
+
     public static float ClampedRemap(float value, float inputMin, float inputMax, float outputMin, float outputMax)
     {
         // Clamp the input value to the input range first

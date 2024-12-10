@@ -16,5 +16,10 @@ public class CustomEditorVG : Editor
         {
             _target.createGrid();
         }
+        if (GUILayout.Button("Test"))
+        {
+            _target.deploySmoke(new Vector3(23.882f,0.631f,15.556f));
+        }
+
     }
 }

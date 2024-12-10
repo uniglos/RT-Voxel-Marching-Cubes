@@ -1,6 +1,6 @@
+using NUnit.Framework;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
+using System.Xml;
 using UnityEngine;
 
 
@@ -9,7 +9,11 @@ public class VoxelGrid : MonoBehaviour
     VoxelGridData voxelGrid;
     public Vector3 Size = new Vector3(10, 10, 10);    
 
+    public float voxelSize = 0.5f;
     public GameObject prefab;
+    public GameObject prefab2;
+
+    public bool DrawGizmos = true;
 
     private void Start()
     {
@@ -18,38 +22,58 @@ public class VoxelGrid : MonoBehaviour
         voxelGrid.setRes(Size);
 
         Debug.Log("start");
-        createGrid();
+        //createGrid();
+        //drawGrid();
     }
+
+
+
+    public void deploySmoke(Vector3 pos)
+    {
+        Vector3 position = MyMath.RoundToNearestVoxel(pos,voxelSize);
+        if(voxelGrid.read(position.x, position.y, position.z,voxelSize) == 1) {
+            Instantiate(prefab2,position,Quaternion.identity);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 
 
     private void Update()
     {
-        //createGrid();
+        createGrid();
     }
 
     public void createGrid()
     {
         voxelGrid.newGrid();
         //Starts at 0,0,0
-        for (int z = 0; z < Size.z; z++)
-        {
-            Debug.Log("Z");
-            for (int y = 0; y < Size.y; y++)
-            {
-                Debug.Log("Y");
-                for (int x = 0; x < Size.x; z++)
+        for (float z = 0; z < Size.z; z+= voxelSize)
+        {            
+            for (float y = 0; y < Size.y; y +=voxelSize)
+            {                
+                for (float x = 0; x < Size.x; x += voxelSize)
                 {
-                    Debug.Log("X");
+                    
                     voxelGrid.add(scalarField(x, y, z));
                 }
             }
         }
-
+        
     }
+
 
     float scalarField(float x, float y, float z)
     {
-        Collider[] hit = Physics.OverlapBox(new Vector3(x, y, z), new Vector3(.75f, 0.75f, 0.75f), Quaternion.identity);
+        Collider[] hit = Physics.OverlapBox(new Vector3(x, y, z), new Vector3(voxelSize*0.5f,voxelSize* 0.5f, voxelSize * 0.5f), Quaternion.identity);
         if (hit.Length > 0)
         {
             return 0;
@@ -60,9 +84,48 @@ public class VoxelGrid : MonoBehaviour
         }
     }
 
- 
 
 
+    private void OnDrawGizmos()
+    {
+        if (DrawGizmos)
+        {
+            for (float z = 0; z < Size.z; z += voxelSize)
+            {
+
+                for (float y = 0; y < Size.y; y += voxelSize)
+                {
+
+                    for (float x = 0; x < Size.x; x += voxelSize)
+                    {
+
+                        Gizmos.color = new Color(voxelGrid.read(x, y, z, voxelSize), voxelGrid.read(x, y, z, voxelSize), voxelGrid.read(x, y, z, voxelSize));
+                        Gizmos.DrawSphere(new Vector3(x, y, z), 0.15f);
+
+                    }
+                }
+            }
+        }
+    }
+
+    //void drawGrid()
+    //{
+    //    for (float z = 0; z < Size.z; z += voxelSize)
+    //    {
+
+    //        for (float y = 0; y < Size.y; y += voxelSize)
+    //        {
+
+    //            for (float x = 0; x < Size.x; x += voxelSize)
+    //            {
+    //                if (voxelGrid.read(x, y, z, voxelSize) == 1)
+    //                {
+    //                    Instantiate(prefab, new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), Quaternion.identity);
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
 
     public struct VoxelGridData
@@ -72,7 +135,7 @@ public class VoxelGrid : MonoBehaviour
 
         public void newGrid()
         {
-            Data = new List<float>();
+            Data = new List<float>((int)(Size.x * Size.y * Size.z));
         }
 
         public void setRes(Vector3 res)
@@ -87,11 +150,25 @@ public class VoxelGrid : MonoBehaviour
             Data.Add(value);
         }
 
-        public float read(int x, int y, int z)
+        public float read(float x, float y, float z, float voxelSize)
         {
+            int ix = Mathf.FloorToInt(x / voxelSize);
+            int iy = Mathf.FloorToInt(y / voxelSize);
+            int iz = Mathf.FloorToInt(z / voxelSize);
 
-            return Data[(int)(x)  + (int)(y) * (int)Size.y + (int)(z) * (int)Size.z * (int)Size.x];
+            int gridWidth = Mathf.FloorToInt(Size.x / voxelSize);
+            int gridHeight = Mathf.FloorToInt(Size.y / voxelSize);
 
+            int index = ix + gridWidth * (iy + gridHeight * iz);
+
+            if (index >= 0 && index < Data.Count)
+            {
+                return Data[index];
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         public int dataCount()
