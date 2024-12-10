@@ -1,55 +1,132 @@
 using NUnit.Framework;
+using NUnit.Framework.Internal.Filters;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
+using Unity.Burst.Intrinsics;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.ProBuilder.Shapes;
+using UnityEngine.UIElements;
 
 
 public class VoxelGrid : MonoBehaviour
 {
+    public static VoxelGrid Instance { get; private set; }
+
+    
+
     VoxelGridData voxelGrid;
     public Vector3 Size = new Vector3(10, 10, 10);    
 
     public float voxelSize = 0.5f;
+    public LayerMask mask;
     public GameObject prefab;
     public GameObject prefab2;
 
     public bool DrawGizmos = true;
 
+
+    GameObject SmokeOrigin;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
+
     private void Start()
     {
-        Debug.Log("AAA");
+
         voxelGrid = new VoxelGridData();
         voxelGrid.setRes(Size);
 
-        Debug.Log("start");
-        //createGrid();
+        createGrid();
         //drawGrid();
     }
 
 
 
-    public void deploySmoke(Vector3 pos)
+    public void deploySmoke(Vector3 pos, float radius)
     {
+        
         Vector3 position = MyMath.RoundToNearestVoxel(pos,voxelSize);
-        if(voxelGrid.read(position.x, position.y, position.z,voxelSize) == 1) {
-            Instantiate(prefab2,position,Quaternion.identity);
+        Debug.Log(position);
+        Debug.Log(voxelGrid.read(20f, 0.5f, 24.5f,voxelSize));
+        if (voxelGrid.read(position.x, position.y, position.z,voxelSize) == 1) {
+            
+            SmokeOrigin = Instantiate(prefab2,position,Quaternion.identity);
+            CheckArea(radius);
         }
+
     }
 
 
+    public void CheckArea(float radius)
+    {
+        
+        List<Vector3> positions = new List<Vector3>();
+        for (int y = 0; y <= 5; y++)
+        {            
+            for (int x = -5; x < 6; x++)
+            {                
+                for (int z = -5 ; z < 6; z++)
+                {                    
+                    Vector3 testPos = new Vector3(SmokeOrigin.transform.position.x + voxelSize * x, SmokeOrigin.transform.position.y + voxelSize*y, SmokeOrigin.transform.position.z + voxelSize * z);
+                    
+                    if (Vector3.Distance(SmokeOrigin.transform.position, testPos) > Mathf.Sqrt(Mathf.PI)*radius)
+                    {
+                        continue;
+                    }
+
+                    Vector3 voxelPos = MyMath.RoundToNearestVoxel(testPos, voxelSize);
+                    float indx = voxelGrid.read(voxelPos.x, voxelPos.y, voxelPos.z, voxelSize);
+                    if (indx != -1 && indx == 1)
+                    {
+                        positions.Add(voxelPos);
+                    }
 
 
+                }
+            }
+        }
+        List<Vector3> ValidPositions = VoxelPathFind.PathFind(positions.ToArray(), MyMath.RoundToNearestVoxel(SmokeOrigin.transform.position,voxelSize),voxelSize);
+        SpawnVoxels(ValidPositions);
+    }
 
+    void SpawnVoxels(List<Vector3> validPositions)
+    {
+        Vector3[] arr = validPositions.ToArray();
+       
+        arr = arr.OrderBy((d) => (d - SmokeOrigin.transform.position).sqrMagnitude).ToArray();
+        
 
+        StartCoroutine(interp(arr));
+        
+    }
 
-
-
-
-
+    public IEnumerator interp(Vector3[] arr)
+    {
+        foreach (Vector3 validPos in arr)
+        {
+            Instantiate(prefab2, validPos, Quaternion.identity, SmokeOrigin.transform);
+            yield return new WaitForSeconds(0.01f);
+        }
+        
+    }
+   
 
     private void Update()
     {
-        createGrid();
+        //createGrid();
     }
 
     public void createGrid()
@@ -70,10 +147,10 @@ public class VoxelGrid : MonoBehaviour
         
     }
 
-
+   
     float scalarField(float x, float y, float z)
     {
-        Collider[] hit = Physics.OverlapBox(new Vector3(x, y, z), new Vector3(voxelSize*0.5f,voxelSize* 0.5f, voxelSize * 0.5f), Quaternion.identity);
+        Collider[] hit = Physics.OverlapBox(new Vector3(x, y, z), new Vector3(voxelSize*0.5f,voxelSize* 0.5f, voxelSize * 0.5f), Quaternion.identity,mask);
         if (hit.Length > 0)
         {
             return 0;
@@ -108,26 +185,6 @@ public class VoxelGrid : MonoBehaviour
         }
     }
 
-    //void drawGrid()
-    //{
-    //    for (float z = 0; z < Size.z; z += voxelSize)
-    //    {
-
-    //        for (float y = 0; y < Size.y; y += voxelSize)
-    //        {
-
-    //            for (float x = 0; x < Size.x; x += voxelSize)
-    //            {
-    //                if (voxelGrid.read(x, y, z, voxelSize) == 1)
-    //                {
-    //                    Instantiate(prefab, new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), Quaternion.identity);
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
-
     public struct VoxelGridData
     {
         List<float> Data;
@@ -152,24 +209,26 @@ public class VoxelGrid : MonoBehaviour
 
         public float read(float x, float y, float z, float voxelSize)
         {
-            int ix = Mathf.FloorToInt(x / voxelSize);
-            int iy = Mathf.FloorToInt(y / voxelSize);
-            int iz = Mathf.FloorToInt(z / voxelSize);
+            
+                int ix = Mathf.FloorToInt(x / voxelSize);
+                int iy = Mathf.FloorToInt(y / voxelSize);
+                int iz = Mathf.FloorToInt(z / voxelSize);
 
-            int gridWidth = Mathf.FloorToInt(Size.x / voxelSize);
-            int gridHeight = Mathf.FloorToInt(Size.y / voxelSize);
+                int gridWidth = Mathf.FloorToInt(Size.x / voxelSize);
+                int gridHeight = Mathf.FloorToInt(Size.y / voxelSize);
 
-            int index = ix + gridWidth * (iy + gridHeight * iz);
+                int index = ix + gridWidth * (iy + gridHeight * iz);
 
-            if (index >= 0 && index < Data.Count)
-            {
-                return Data[index];
-            }
-            else
-            {
-                return -1;
-            }
+                if (index >= 0 && index < Data.Count)
+                {
+                    return Data[index];
+                }
+                else
+                {
+                    return -1;
+                }
         }
+           
 
         public int dataCount()
         {
