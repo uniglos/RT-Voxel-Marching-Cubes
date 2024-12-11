@@ -18,7 +18,7 @@ public class CustomEditorVG : Editor
         }
         if (GUILayout.Button("Test Deploy"))
         {
-            _target.deploySmoke(new Vector3(23.882f,0.631f,15.556f),0.5f);
+            _target.deploySmoke(new Vector3(23.882f,0.631f,15.556f),0.5f,5,200);
         }
 
     }

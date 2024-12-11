@@ -10,6 +10,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.UIElements;
+using UnityEngine.VFX;
 
 
 public class VoxelGrid : MonoBehaviour
@@ -23,13 +24,13 @@ public class VoxelGrid : MonoBehaviour
 
     public float voxelSize = 0.5f;
     public LayerMask mask;
-    public GameObject prefab;
-    public GameObject prefab2;
+    
+    public GameObject Voxel;
 
     public bool DrawGizmos = true;
 
 
-    GameObject SmokeOrigin;
+   GameObject SmokeOrigin;
 
     private void Awake()
     {
@@ -55,30 +56,32 @@ public class VoxelGrid : MonoBehaviour
 
 
 
-    public void deploySmoke(Vector3 pos, float radius)
+    public void deploySmoke(Vector3 pos, float radius,int maxSize, int defuse)
     {
         
         Vector3 position = MyMath.RoundToNearestVoxel(pos,voxelSize);
         Debug.Log(position);
         Debug.Log(voxelGrid.read(20f, 0.5f, 24.5f,voxelSize));
-        if (voxelGrid.read(position.x, position.y, position.z,voxelSize) == 1) {
-            
-            SmokeOrigin = Instantiate(prefab2,position,Quaternion.identity);
-            CheckArea(radius);
-        }
+        //if (voxelGrid.read(position.x, position.y, position.z,voxelSize) == 1) {
+
+            //SmokeOrigin = Instantiate(Voxel,position,Quaternion.identity);
+            SmokeOrigin = new GameObject("SmokeSource");
+            SmokeOrigin.transform.position = position;
+            CheckArea(radius,maxSize, defuse);
+        //}
 
     }
 
 
-    public void CheckArea(float radius)
+    public void CheckArea(float radius,int maxSmokeSize,int defuse)
     {
         
         List<Vector3> positions = new List<Vector3>();
-        for (int y = 0; y <= 5; y++)
+        for (int y = (int)(-maxSmokeSize*0.5f); y <= maxSmokeSize * 0.5f; y++)
         {            
-            for (int x = -5; x < 6; x++)
+            for (int x = (int)(-maxSmokeSize * 0.5f); x < maxSmokeSize*0.5f; x++)
             {                
-                for (int z = -5 ; z < 6; z++)
+                for (int z = (int)(-maxSmokeSize * 0.5f); z < maxSmokeSize * 0.5f; z++)
                 {                    
                     Vector3 testPos = new Vector3(SmokeOrigin.transform.position.x + voxelSize * x, SmokeOrigin.transform.position.y + voxelSize*y, SmokeOrigin.transform.position.z + voxelSize * z);
                     
@@ -98,27 +101,72 @@ public class VoxelGrid : MonoBehaviour
                 }
             }
         }
-        List<Vector3> ValidPositions = VoxelPathFind.PathFind(positions.ToArray(), MyMath.RoundToNearestVoxel(SmokeOrigin.transform.position,voxelSize),voxelSize);
+        List<Vector3> ValidPositions = FloodFill(SmokeOrigin.transform.position, positions, voxelSize,defuse); //VoxelPathFind.PathFind(positions.ToArray(), MyMath.RoundToNearestVoxel(SmokeOrigin.transform.position,voxelSize),voxelSize);
         SpawnVoxels(ValidPositions);
     }
 
     void SpawnVoxels(List<Vector3> validPositions)
     {
-        Vector3[] arr = validPositions.ToArray();
-       
-        arr = arr.OrderBy((d) => (d - SmokeOrigin.transform.position).sqrMagnitude).ToArray();
-        
-
-        StartCoroutine(interp(arr));
-        
+        Vector3[] arr = validPositions.ToArray();       
+        //arr = arr.OrderBy((d) => (d - SmokeOrigin.transform.position).sqrMagnitude).ToArray();      
+        StartCoroutine(interp(arr));        
     }
+
+
+    List<Vector3> FloodFill(Vector3 sourceNode, List<Vector3> positions, float voxelSize, int defuse)
+    {
+        Vector3[] Directions = {
+        Vector3.right,
+        Vector3.left,
+        Vector3.up,
+        Vector3.down,
+        Vector3.forward,
+        Vector3.back
+    };
+        List<Vector3> FilledPositions = new List<Vector3>();
+        List<Vector3> Q = new List<Vector3>();
+        Debug.Log(positions.Count);
+        Q.Add(sourceNode);
+        FilledPositions.Add(sourceNode);
+        int i = positions.Count;
+
+        while (Q.Count > 0)
+        {
+
+            i--;
+            if(i == defuse) break;
+            Vector3 n = Q[0];
+            Q.RemoveAt(0);
+
+            foreach (Vector3 d in Directions)
+            {
+                Vector3 testPos = n + (d * voxelSize);
+
+                // Only process if testPos is part of `positions` and hasn't been filled yet
+                if (positions.Contains(testPos) && !FilledPositions.Contains(testPos))
+                {
+                    Q.Add(testPos);
+                    FilledPositions.Add(testPos); // Mark as filled to avoid revisiting
+                }
+            }            
+        }
+        Debug.Log(i);
+        return FilledPositions;
+    }
+
+
+
 
     public IEnumerator interp(Vector3[] arr)
     {
+        double time = 0.001f;
         foreach (Vector3 validPos in arr)
         {
-            Instantiate(prefab2, validPos, Quaternion.identity, SmokeOrigin.transform);
-            yield return new WaitForSeconds(0.01f);
+            Instantiate(Voxel, validPos, Quaternion.identity, SmokeOrigin.transform);
+            time = time * time;
+
+
+            yield return new WaitForSeconds((float)time);
         }
         
     }
@@ -236,6 +284,14 @@ public class VoxelGrid : MonoBehaviour
         }
     }
 
+    private void OnValidate()
+    {
+        if(Size.x*Size.y*Size.z > 2700 && DrawGizmos)
+        {
+
+            Debug.LogWarning("Gizmo Count will Exceed 2700! Consider Disabling Draw Gizmos");
+        }
+    }
 
 
 }

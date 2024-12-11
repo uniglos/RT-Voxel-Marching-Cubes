@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ public class GrenCustomEditor : Editor
 
         if (GUILayout.Button("Deploy"))
         {
-            _target.VoxelGrid.deploySmoke(_target.transform.position,_target.Radius);
+            _target.VoxelGrid.deploySmoke(_target.transform.position,_target.Radius,_target.maxSmokeSize,_target.defuse);
         }
 
     }
