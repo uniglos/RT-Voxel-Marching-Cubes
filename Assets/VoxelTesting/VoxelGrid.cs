@@ -23,14 +23,14 @@ public class VoxelGrid : MonoBehaviour
     public Vector3 Size = new Vector3(10, 10, 10);    
 
     public float voxelSize = 0.5f;
-    public LayerMask mask;
-    
-    public GameObject Voxel;
+    public LayerMask mask;  
 
     public bool DrawGizmos = true;
 
+    public Material GizmoMaterial;
+    public Mesh GizmoMesh;
 
-   GameObject SmokeOrigin;
+   public GameObject SmokeSouce;
 
     List<Vector3> Spawnlist = new List<Vector3>();
 
@@ -48,35 +48,49 @@ public class VoxelGrid : MonoBehaviour
 
     private void Start()
     {
-
+        
         voxelGrid = new VoxelGridData();
         voxelGrid.setRes(Size);
 
         createGrid();
-        //drawGrid();
+        
     }
 
+    private void Update()
+    {
+        if (DrawGizmos)
+        {
+            for (float z = 0; z < Size.z; z += voxelSize)
+            {
+
+                for (float y = 0; y < Size.y; y += voxelSize)
+                {
+
+                    for (float x = 0; x < Size.x; x += voxelSize)
+                    {
+                        Graphics.DrawMesh(GizmoMesh,new Vector3(x,y,z),Quaternion.identity,GizmoMaterial,0);   
+                    }
+                }
+            }
+        }
+    } 
 
 
-    public void deploySmoke(Vector3 pos, float radius, int maxSize, int defuse)
+    public void deploySmoke(Vector3 pos, float radius, int maxSize, int defuse )
     {
 
         Vector3 position = MyMath.RoundToNearestVoxel(pos, voxelSize);
         Debug.Log(position);
         Debug.Log(voxelGrid.read(20f, 0.5f, 24.5f, voxelSize));
-        //if (voxelGrid.read(position.x, position.y, position.z,voxelSize) == 1) {
+       
+        GameObject SmokeOrigin =Instantiate(SmokeSouce, position,Quaternion.identity);
 
-        //SmokeOrigin = Instantiate(Voxel,position,Quaternion.identity);
-        SmokeOrigin = new GameObject("SmokeSource");
-        SmokeOrigin.transform.localScale = Vector3.one * voxelSize;
-        SmokeOrigin.transform.position = position;
-        CheckArea(radius, maxSize, defuse);
-        //}
+        CheckArea(radius, maxSize, defuse, SmokeOrigin);
 
     }
 
 
-    public void CheckArea(float radius,int maxSmokeSize,int defuse)
+    public void CheckArea(float radius,int maxSmokeSize,int defuse, GameObject SmokeOrigin)
     {
         
         List<Vector3> positions = new List<Vector3>();
@@ -105,14 +119,9 @@ public class VoxelGrid : MonoBehaviour
             }
         }
         List<Vector3> ValidPositions = FloodFill(SmokeOrigin.transform.position, positions, voxelSize,defuse); //VoxelPathFind.PathFind(positions.ToArray(), MyMath.RoundToNearestVoxel(SmokeOrigin.transform.position,voxelSize),voxelSize);
-        SpawnVoxels(ValidPositions);
+        SmokeOrigin.GetComponent<SmokeSource>().arr = ValidPositions;
     }
 
-    void SpawnVoxels(List<Vector3> validPositions)
-    {        
-        StartCoroutine(interp(validPositions));
-        
-    }
 
 
     List<Vector3> FloodFill(Vector3 sourceNode, List<Vector3> positions, float voxelSize, int defuse)
@@ -154,32 +163,7 @@ public class VoxelGrid : MonoBehaviour
         }
         Debug.Log(i);
         return FilledPositions;
-    }
-
-
-
-
-    public IEnumerator interp(List<Vector3> arr)
-    {
-        foreach (Vector3 validPos in arr)
-        {
-            Instantiate(Voxel, validPos, Quaternion.identity, SmokeOrigin.transform);
-            yield return null;
-        }
-
-    }
-   
-
-    private void Update()
-    {
-        //if (Spawnlist.Count > 0) {
-        //    foreach (Vector3 pos in Spawnlist) {
-        //        Instantiate(Voxel, pos, Quaternion.identity, SmokeOrigin.transform);
-                
-        //    }
-        //    Spawnlist.Clear();
-        //}
-    }
+    }  
 
     public void createGrid()
     {
@@ -215,27 +199,27 @@ public class VoxelGrid : MonoBehaviour
 
 
 
-    private void OnDrawGizmos()
-    {
-        if (DrawGizmos)
-        {
-            for (float z = 0; z < Size.z; z += voxelSize)
-            {
+    //private void OnDrawGizmos()
+    //{
+    //    if (DrawGizmos)
+    //    {
+    //        for (float z = 0; z < Size.z; z += voxelSize)
+    //        {
 
-                for (float y = 0; y < Size.y; y += voxelSize)
-                {
+    //            for (float y = 0; y < Size.y; y += voxelSize)
+    //            {
 
-                    for (float x = 0; x < Size.x; x += voxelSize)
-                    {
+    //                for (float x = 0; x < Size.x; x += voxelSize)
+    //                {
 
-                        Gizmos.color = new Color(voxelGrid.read(x, y, z, voxelSize), voxelGrid.read(x, y, z, voxelSize), voxelGrid.read(x, y, z, voxelSize));
-                        Gizmos.DrawSphere(new Vector3(x, y, z), 0.15f);
+    //                    Gizmos.color = new Color(voxelGrid.read(x, y, z, voxelSize), voxelGrid.read(x, y, z, voxelSize), voxelGrid.read(x, y, z, voxelSize));
+    //                    Gizmos.DrawSphere(new Vector3(x, y, z), 0.15f);
 
-                    }
-                }
-            }
-        }
-    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
     public struct VoxelGridData
     {

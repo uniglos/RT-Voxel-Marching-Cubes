@@ -8133,12 +8133,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Size: {x: 30, y: 30, z: 30}
-  voxelSize: 0.25
+  voxelSize: 0.375
   mask:
     serializedVersion: 2
     m_Bits: 51
-  Voxel: {fileID: 4805084098212393016, guid: 3221d3690d5da4140923f752fe36c8d1, type: 3}
-  DrawGizmos: 0
+  DrawGizmos: 1
+  GizmoMaterial: {fileID: 2100000, guid: 040a3537ac934fb4f802f61d64b1df96, type: 2}
+  GizmoMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  SmokeSouce: {fileID: 7429245394167915523, guid: 4fc4461a9e893fb439d3b428c1bd8e12, type: 3}
 --- !u!1 &297467440
 GameObject:
   m_ObjectHideFlags: 0
@@ -8373,7 +8375,7 @@ MonoBehaviour:
   VoxelGrid: {fileID: 0}
   Radius: 1.5
   maxSmokeSize: 25
-  defuse: 2200
+  defuse: 650
 --- !u!43 &393719578
 Mesh:
   m_ObjectHideFlags: 0
@@ -33120,6 +33122,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 629475923901507988, guid: 364aeb1b97d3f01419aa1df5652b0b35, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.3094
+      objectReference: {fileID: 0}
+    - target: {fileID: 629475923901507988, guid: 364aeb1b97d3f01419aa1df5652b0b35, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.31297168
+      objectReference: {fileID: 0}
+    - target: {fileID: 629475923901507988, guid: 364aeb1b97d3f01419aa1df5652b0b35, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.3094
+      objectReference: {fileID: 0}
+    - target: {fileID: 629475923901507988, guid: 364aeb1b97d3f01419aa1df5652b0b35, type: 3}
       propertyPath: m_LocalPosition.x
       value: 18.32
       objectReference: {fileID: 0}
@@ -33158,6 +33172,14 @@ PrefabInstance:
     - target: {fileID: 629475923901507988, guid: 364aeb1b97d3f01419aa1df5652b0b35, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1257284909481055661, guid: 364aeb1b97d3f01419aa1df5652b0b35, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+    - target: {fileID: 3110213568510997686, guid: 364aeb1b97d3f01419aa1df5652b0b35, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5250069262525446572, guid: 364aeb1b97d3f01419aa1df5652b0b35, type: 3}
       propertyPath: m_Name
