@@ -32,6 +32,8 @@ public class VoxelGrid : MonoBehaviour
 
    GameObject SmokeOrigin;
 
+    List<Vector3> Spawnlist = new List<Vector3>();
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -56,18 +58,19 @@ public class VoxelGrid : MonoBehaviour
 
 
 
-    public void deploySmoke(Vector3 pos, float radius,int maxSize, int defuse)
+    public void deploySmoke(Vector3 pos, float radius, int maxSize, int defuse)
     {
-        
-        Vector3 position = MyMath.RoundToNearestVoxel(pos,voxelSize);
+
+        Vector3 position = MyMath.RoundToNearestVoxel(pos, voxelSize);
         Debug.Log(position);
-        Debug.Log(voxelGrid.read(20f, 0.5f, 24.5f,voxelSize));
+        Debug.Log(voxelGrid.read(20f, 0.5f, 24.5f, voxelSize));
         //if (voxelGrid.read(position.x, position.y, position.z,voxelSize) == 1) {
 
-            //SmokeOrigin = Instantiate(Voxel,position,Quaternion.identity);
-            SmokeOrigin = new GameObject("SmokeSource");
-            SmokeOrigin.transform.position = position;
-            CheckArea(radius,maxSize, defuse);
+        //SmokeOrigin = Instantiate(Voxel,position,Quaternion.identity);
+        SmokeOrigin = new GameObject("SmokeSource");
+        SmokeOrigin.transform.localScale = Vector3.one * voxelSize;
+        SmokeOrigin.transform.position = position;
+        CheckArea(radius, maxSize, defuse);
         //}
 
     }
@@ -106,10 +109,9 @@ public class VoxelGrid : MonoBehaviour
     }
 
     void SpawnVoxels(List<Vector3> validPositions)
-    {
-        Vector3[] arr = validPositions.ToArray();       
-        //arr = arr.OrderBy((d) => (d - SmokeOrigin.transform.position).sqrMagnitude).ToArray();      
-        StartCoroutine(interp(arr));        
+    {        
+        StartCoroutine(interp(validPositions));
+        
     }
 
 
@@ -157,24 +159,26 @@ public class VoxelGrid : MonoBehaviour
 
 
 
-    public IEnumerator interp(Vector3[] arr)
+    public IEnumerator interp(List<Vector3> arr)
     {
-        double time = 0.001f;
         foreach (Vector3 validPos in arr)
         {
             Instantiate(Voxel, validPos, Quaternion.identity, SmokeOrigin.transform);
-            time = time * time;
-
-
-            yield return new WaitForSeconds((float)time);
+            yield return null;
         }
-        
+
     }
    
 
     private void Update()
     {
-        //createGrid();
+        //if (Spawnlist.Count > 0) {
+        //    foreach (Vector3 pos in Spawnlist) {
+        //        Instantiate(Voxel, pos, Quaternion.identity, SmokeOrigin.transform);
+                
+        //    }
+        //    Spawnlist.Clear();
+        //}
     }
 
     public void createGrid()
