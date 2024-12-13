@@ -50,7 +50,10 @@ public class SmokeSource : MonoBehaviour
         float time = 0.00001f;
         for (int i = 0; i < arr.Count; i++) {
             todraw.Add(arr[i]);
-            time = ease(time);
+            if (i > arr.Count * 0.9f)
+            {
+                time = ease(time);
+            }
             yield return new WaitForSeconds(time);
         }
     }
@@ -58,7 +61,7 @@ public class SmokeSource : MonoBehaviour
 
     float ease(float time)
     {
-        return time == 0 ? 0 : Mathf.Pow(2, 10 * time - 10);
+        return Mathf.Sqrt(1 - Mathf.Pow(time - 1, 2));
     }
 
 

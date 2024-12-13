@@ -84,6 +84,7 @@ public class VoxelGrid : MonoBehaviour
         Debug.Log(voxelGrid.read(20f, 0.5f, 24.5f, voxelSize));
        
         GameObject SmokeOrigin =Instantiate(SmokeSouce, position,Quaternion.identity);
+        SmokeOrigin.transform.localScale = Vector3.one*voxelSize;
 
         CheckArea(radius, maxSize, defuse, SmokeOrigin);
 
