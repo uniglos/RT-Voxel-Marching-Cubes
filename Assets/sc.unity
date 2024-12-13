@@ -8133,11 +8133,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Size: {x: 30, y: 30, z: 30}
-  voxelSize: 0.375
+  voxelSize: 0.25
   mask:
     serializedVersion: 2
     m_Bits: 51
-  DrawGizmos: 1
+  DrawGizmos: 0
   GizmoMaterial: {fileID: 2100000, guid: 040a3537ac934fb4f802f61d64b1df96, type: 2}
   GizmoMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   SmokeSouce: {fileID: 7429245394167915523, guid: 4fc4461a9e893fb439d3b428c1bd8e12, type: 3}

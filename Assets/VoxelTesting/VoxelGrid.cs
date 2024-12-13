@@ -119,10 +119,20 @@ public class VoxelGrid : MonoBehaviour
             }
         }
         List<Vector3> ValidPositions = FloodFill(SmokeOrigin.transform.position, positions, voxelSize,defuse); //VoxelPathFind.PathFind(positions.ToArray(), MyMath.RoundToNearestVoxel(SmokeOrigin.transform.position,voxelSize),voxelSize);
-        SmokeOrigin.GetComponent<SmokeSource>().arr = ValidPositions;
+        SmokeOrigin.GetComponent<SmokeSource>().StartSmoke(ValidPositions);
+        //test(ValidPositions);
     }
 
 
+    void test(List<Vector3> pos)
+    {
+        GameObject go = new GameObject();
+        foreach ( Vector3 v in pos)
+        {
+            
+            Instantiate(go, v    , Quaternion.identity);
+        }
+    }
 
     List<Vector3> FloodFill(Vector3 sourceNode, List<Vector3> positions, float voxelSize, int defuse)
     {
@@ -274,7 +284,7 @@ public class VoxelGrid : MonoBehaviour
 
     private void OnValidate()
     {
-        if(Size.x*Size.y*Size.z > 2700 && DrawGizmos)
+        if((Size.x*Size.y*Size.z)/voxelSize > 2700 && DrawGizmos)
         {
 
             Debug.LogWarning("Gizmo Count will Exceed 2700! Consider Disabling Draw Gizmos");
