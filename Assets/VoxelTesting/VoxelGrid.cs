@@ -15,21 +15,26 @@ using UnityEngine.VFX;
 
 public class VoxelGrid : MonoBehaviour
 {
-    public static VoxelGrid Instance { get; private set; }
 
-    
+    /// <summary>
+    /// Make this a singleton
+    /// </summary>
+    public static VoxelGrid Instance { get; private set; }
 
     VoxelGridData voxelGrid;
     public Vector3 Size = new Vector3(10, 10, 10);    
 
     public float voxelSize = 0.5f;
     public LayerMask mask;  
-
     public bool DrawGizmos = true;
 
+    /// <summary>
+    /// Mesh and material for drawing "gizmos"
+    /// </summary>
     public Material GizmoMaterial;
     public Mesh GizmoMesh;
 
+    [Header("Prefab of smokeSource object. This should have smoke source script")]
    public GameObject SmokeSouce;
 
     List<Vector3> Spawnlist = new List<Vector3>();
@@ -79,9 +84,7 @@ public class VoxelGrid : MonoBehaviour
     public void deploySmoke(Vector3 pos, float radius, int maxSize, int defuse )
     {
 
-        Vector3 position = MyMath.RoundToNearestVoxel(pos, voxelSize);
-        Debug.Log(position);
-        Debug.Log(voxelGrid.read(20f, 0.5f, 24.5f, voxelSize));
+        Vector3 position = MyMath.RoundToNearestVoxel(pos, voxelSize);        
        
         GameObject SmokeOrigin =Instantiate(SmokeSouce, position,Quaternion.identity);
         SmokeOrigin.transform.localScale = Vector3.one*voxelSize;
@@ -121,7 +124,7 @@ public class VoxelGrid : MonoBehaviour
         }
         List<Vector3> ValidPositions = FloodFill(SmokeOrigin.transform.position, positions, voxelSize,defuse); //VoxelPathFind.PathFind(positions.ToArray(), MyMath.RoundToNearestVoxel(SmokeOrigin.transform.position,voxelSize),voxelSize);
         SmokeOrigin.GetComponent<SmokeSource>().StartSmoke(ValidPositions);
-        //test(ValidPositions);
+       
     }
 
 
@@ -146,8 +149,7 @@ public class VoxelGrid : MonoBehaviour
         Vector3.back
     };
         List<Vector3> FilledPositions = new List<Vector3>();
-        List<Vector3> Q = new List<Vector3>();
-        Debug.Log(positions.Count);
+        List<Vector3> Q = new List<Vector3>();        
         Q.Add(sourceNode);
         FilledPositions.Add(sourceNode);
         int i = positions.Count;
@@ -171,22 +173,19 @@ public class VoxelGrid : MonoBehaviour
                     FilledPositions.Add(testPos); // Mark as filled to avoid revisiting
                 }
             }            
-        }
-        Debug.Log(i);
+        }       
         return FilledPositions;
     }  
 
     public void createGrid()
     {
-        voxelGrid.newGrid();
-        //Starts at 0,0,0
+        voxelGrid.newGrid();        
         for (float z = 0; z < Size.z; z+= voxelSize)
         {            
             for (float y = 0; y < Size.y; y +=voxelSize)
             {                
                 for (float x = 0; x < Size.x; x += voxelSize)
-                {
-                    
+                {                    
                     voxelGrid.add(scalarField(x, y, z));
                 }
             }
@@ -209,29 +208,6 @@ public class VoxelGrid : MonoBehaviour
     }
 
 
-
-    //private void OnDrawGizmos()
-    //{
-    //    if (DrawGizmos)
-    //    {
-    //        for (float z = 0; z < Size.z; z += voxelSize)
-    //        {
-
-    //            for (float y = 0; y < Size.y; y += voxelSize)
-    //            {
-
-    //                for (float x = 0; x < Size.x; x += voxelSize)
-    //                {
-
-    //                    Gizmos.color = new Color(voxelGrid.read(x, y, z, voxelSize), voxelGrid.read(x, y, z, voxelSize), voxelGrid.read(x, y, z, voxelSize));
-    //                    Gizmos.DrawSphere(new Vector3(x, y, z), 0.15f);
-
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
     public struct VoxelGridData
     {
         List<float> Data;
@@ -249,8 +225,7 @@ public class VoxelGrid : MonoBehaviour
         }
 
         public void add(float value)
-        {
-            //Data.Insert(0, value);
+        {            
             Data.Add(value);
         }
 

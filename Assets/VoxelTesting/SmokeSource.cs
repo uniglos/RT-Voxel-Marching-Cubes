@@ -65,15 +65,6 @@ public class SmokeSource : MonoBehaviour
     }
 
 
-
-    /// <summary>
-    /// NEXT NEED TO ADD ARR TO DRAW ARR OVER LERP TIME  TO SHOW SMOKE EXPANDING
-    /// TO DRAW WILL ALWAYS BE DRAWN IN UPDATE 
-    /// CAN MAKE IENUMBERABLE FOR ADDING TO LIST AS ITS QUICKER THAN INSTANTIATING
-    /// 
-    /// </summary>
-
-
     private void Update()
     {
 
