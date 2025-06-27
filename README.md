@@ -4,3 +4,7 @@ the smoke mechanics from CS using voxels. In the projects current state, there i
 and it will create a voxel sphere around the smoke. The creation of the smoke it on a lerp so it happens over time and slows down towards the end.
 Using the voxel grid the smoke will only deploy in empty voxels and will curve around objectsalso filling spaces that its in. To prevent voxels being spawned on the other side of thin walls
 there is a floodfill algorithm to check which voxels are in reach of the source.
+
+
+https://github.com/user-attachments/assets/5bffbace-0842-44a9-b1ff-dd0b7242bf06
+
